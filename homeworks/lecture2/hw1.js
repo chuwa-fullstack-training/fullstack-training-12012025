@@ -4,7 +4,10 @@
 * This function does not handle getters and setters or copy attributes.
 */
 function extend(o, p) {
-    // implement your code here
+    // Copy all enumerable properties from p into o
+    for (let key in p) {
+        o[key] = p[key];
+    }
 }
 
 /*
@@ -12,7 +15,16 @@ function extend(o, p) {
 * If o and p have properties by the same name, the values from o are used.
 */
 function union(o, p) {
-    // implement your code here
+    let result = {};
+    // Copy p first
+    for (let key in p) {
+        result[key] = p[key];
+    }
+    // Then copy o (o overwrites p if same key)
+    for (let key in o) {
+        result[key] = o[key];
+    }
+    return result;
 }
 
 /*
@@ -20,7 +32,12 @@ function union(o, p) {
 * Return o.
 */
 function restrict(o, p) {
-    // implement your code here
+    for (let key in o) {
+        if (!(key in p)) {
+            delete o[key];
+        }
+    }
+    return o;
 }
 
 /*
@@ -29,5 +46,11 @@ function restrict(o, p) {
 * the properties in p are discarded
 */
 function intersection(o, p) {
-    // implement your code here
+    let result = {};
+    for (let key in o) {
+        if (key in p) {
+            result[key] = o[key];
+        }
+    }
+    return result;
 }
