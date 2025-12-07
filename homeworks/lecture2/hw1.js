@@ -4,7 +4,7 @@
 * This function does not handle getters and setters or copy attributes.
 */
 function extend(o, p) {
-    // implement your code here
+    
 }
 
 /*
