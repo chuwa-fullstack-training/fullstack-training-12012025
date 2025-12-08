@@ -5,12 +5,55 @@ function largestElement(list) {
     // implement your code here
 }
 
+function largestElement(list) {
+    if (list.lenth === 0) return undefined;
+    let max = list[0];
+    for (let i = 1; i<list.lenth; i++) {
+        if (list[i] > max) {
+            max = list[i];
+        }
+    }
+    return max;
+}
+
 // 2. Write function that reverses a list, preferably in place.
 function reverseList(list) {
     // implement your code here
+}
+
+function reverseList(list) {
+    let left = 0;
+    let right = list.length - 1;
+
+    while (left < right) {
+        let temp = list[left];
+        list[left] = list[right];
+        list[right] = temp;
+
+        left++;
+        right--;
+    }
+
+    return list;
 }
 
 // 3. Write a function that checks whether an element occurs at least twice in a list.
 function checkTwice(list, element) {
     // implement your code here
 }
+
+function checkTwice(list, element) {
+    let count = 0;
+
+    for (let i = 0; i < list.length; i++) {
+        if (list[i] === element) {
+            count++;
+            if (count >= 2) {
+                return true;  
+            }
+        }
+    }
+
+    return false; 
+}
+
