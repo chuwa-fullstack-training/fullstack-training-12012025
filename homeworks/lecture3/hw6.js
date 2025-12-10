@@ -18,12 +18,28 @@
  * 1 <= nums[i] <= 100
  */
 function numIdenticalPairs(nums) {
-  // implement here
+  let map = {};
+  let count = 0;
+  for (let num of nums) {
+    if (map[num]) {
+      count += map[num];
+      map[num]++;
+    } else {
+      map[num] = 1;
+    }
+  }
 }
 
 /**
  * Given a string s, remove the vowels 'a', 'e', 'i', 'o', and 'u' from it, and return the new string.
  */
 function removeVowels(s) {
-  // implement here
+  const vowels = new Set(['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U']);
+  let result = '';
+  for (let char of s) {
+    if (!vowels.has(char)) {
+      result += char;
+    }
+  }
+  return result;
 }
