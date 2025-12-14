@@ -1,6 +1,8 @@
 // change http request into promise-based function
 
-const https = require('https');
+// const { rejects } = require('assert');
+// const https = require('https');
+// const { resolve } = require('path');
 
 // function httpsRequest(url) {
 //   const options = {
@@ -38,7 +40,19 @@ const https = require('https');
 // }
 
 function getJSON(url) {
-  // implement your code here
+  return new Promise((resolve, reject)=>{
+    fetch(url)
+      .then(response=>{ 
+        return response.json();
+      })
+      .then(data=>{
+        resolve(data);
+      })
+      .catch((err)=>{
+        reject(err);
+      })
+  })
+
 }
 
 getJSON('https://api.github.com/search/repositories?q=javascript')
