@@ -11,6 +11,7 @@ for (let i = 0; i < 5; i++) {
   setTimeout(() => console.log(i), 1000);
 }
 // answer: 0 1 2 3 4
+
 // 3 it's IIFE
 for (var i = 0; i < 5; i++) {
   (function (i) {
@@ -28,7 +29,7 @@ fn = () => {
   console.log('I am another fn');
 }
 
-// answer: 'I am fn'
+// answer: 'I am another fn'
 
 // 5
 let obj = {
