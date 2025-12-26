@@ -1,128 +1,180 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { sequelize, Post } = require('./db');
+const {
+  createUser,
+  findAllUsers,
+  findUserById,
+  updateUser,
+  deleteUser
+} = require('./user');
 
-const sequelize = new Sequelize('test', 'root', 'root1234', {
-  host: '127.0.0.1',
-  dialect: 'mysql'
-});
+// Demo 1
+process.env.DEMO_CASE === '1' &&
+  sequelize
+    .authenticate()
+    .then(() => {
+      console.log('Connection has been established successfully.');
+    })
+    .catch(() => {
+      console.error('Unable to connect to the database: ');
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Connection has been established successfully.');
-  })
-  .catch(error => {
-    console.error('Unable to connect to the database: ', error);
-  });
+// Demo 2: select all users
+process.env.DEMO_CASE === '2' &&
+  sequelize
+    .sync()
+    .then(() => findAllUsers())
+    .then(users => {
+      users.forEach(user => {
+        console.log(user.id, user.firstName, user.lastName);
+      });
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-const User = sequelize.define('users', {
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  lastName: {
-    type: DataTypes.STRING
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false
-  }
-});
+// Demo 3: create a new user
+process.env.DEMO_CASE === '3' &&
+  sequelize
+    .sync({ force: true })
+    .then(() =>
+      createUser({
+        firstName: 'something',
+        lastName: 'new',
+        email: 'unknown@test.com'
+      })
+    )
+    .then(data => {
+      console.log(JSON.stringify(data));
+      console.log('created successfully!');
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-const Post = sequelize.define('posts', {
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  content: {
-    type: DataTypes.TEXT,
-    defaultValue: 'default content'
-  }
-});
+// Demo 4: update a user
+process.env.DEMO_CASE === '4' &&
+  sequelize
+    .sync({ force: false })
+    .then(() => updateUser(1))
+    .then(updatedUser => {
+      console.log('updated user:', JSON.stringify(updatedUser));
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-Post.Author = Post.belongsTo(User, { as: 'author' });
+// Demo 5: delete a user
+process.env.DEMO_CASE === '5' &&
+  sequelize
+    .sync({ force: false })
+    .then(() => deleteUser(1))
+    .then(() => {
+      console.log('deleted user with id 1');
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-// INSERT INTO users (firstName, lastName, email) VALUES ('Aaron', 'Zhang', 'test@gmail');
-function createUser({ firstName, lastName, email }) {
-  return User.create({
-    firstName,
-    lastName,
-    email
-  });
-}
+// Demo 6: create a post
+process.env.DEMO_CASE === '6' &&
+  sequelize
+    .sync({ force: true })
+    .then(() =>
+      createUser({
+        firstName: 'Post',
+        lastName: 'Author',
+        email: 'post.author@test.com'
+      })
+    )
+    .then(() => {
+      return Post.create({
+        title: 'First Post',
+        content: 'This is the content of the first post.',
+        authorId: 1
+      });
+    })
+    .then(post => {
+      console.log('Created Post:', JSON.stringify(post));
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-// SELECT * FROM users;
-function findAllUsers() {
-  return User.findAll();
+// Demo 7: fetch a post with its author
+process.env.DEMO_CASE === '7' &&
+  sequelize
+    .sync({ force: false })
+    .then(() => {
+      return Post.findByPk(1, { include: 'author' });
+    })
+    .then(post => {
+      console.log('Post Title:', post.title);
+      console.log('Post Content:', post.content);
+      console.log('Author Name:', post.author.firstName, post.author.lastName);
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
 
-  // SELECT firstName, lastName FROM users;
-  // return User.findAll({ attributes: ['firstName', 'lastName'] })
-}
-
-// SELECT * FROM users WHERE id = <id>;
-function findUserById(id, callback) {
-  return User.findByPk(id).then(user => {
-    if (callback) return callback(user);
-    console.log(user.firstName, user.lastName);
-    return Promise.resolve(user);
-  });
-}
-
-// UPDATE users SET firstName = 'Alex', lastName = 'Chen' WHERE id = <id>;
-function updateUser(id) {
-  return findUserById(id, user => {
-    user.firstName = 'Alex';
-    user.lastName = 'Chen';
-    return user.save();
-  });
-}
-
-// DELETE FROM users WHERE id = <id>;
-function deleteUser(id) {
-  return findUserById(id, user => {
-    return user.destroy();
-  });
-}
-
-sequelize
-  .sync({ force: true })
-  .then(() => {
-    console.log('tables created successfully!');
-    // createUser({ firstName: 'something', lastName: 'new', email: 'unknown@test.com' });
-    // return findAllUsers();
-    // return findUserById(1);
-    // return updateUser(1);
-    // return deleteUser(1);
-    // return Post.create(
-    //   {
-    //     title: 'Hello World',
-    //     content: 'This is my first post!',
-    //     author: {
-    //       firstName: 'Aaron',
-    //       lastName: 'Zhang',
-    //       email: 'test@gmail.com'
-    //     }
-    //   },
-    //   { include: [Post.Author] }
-    // );
-  })
-  //   .then(users => {
-  //     users.forEach(user => {
-  //       console.log(user.firstName, user.lastName);
-  //     });
-  //   })
-  //   .then(user => {
-  //     console.log(user.firstName, user.lastName);
-  //   })
-  //   .then(() => {
-  //     console.log('updated successfully!');
-  //   })
-  //   .then(() => {
-  //     console.log('deleted successfully!');
-  //   })
-  // .then(post => console.log(post.title, post.author.firstName))
-  .catch(error => {
-    console.error(error);
-  })
-  .finally(() => {
-    sequelize.close();
-  });
+// Demo 8: fetch a user with their posts
+process.env.DEMO_CASE === '8' &&
+  sequelize
+    .sync({ force: true })
+    .then(() => {
+      return createUser({
+        firstName: 'Multi',
+        lastName: 'Poster',
+        email: 'multi.poster@test.com'
+      });
+    })
+    .then(user => {
+      return Post.bulkCreate([
+        {
+          title: 'Post 1',
+          content: 'Content for post 1',
+          authorId: user.id
+        },
+        {
+          title: 'Post 2',
+          content: 'Content for post 2',
+          authorId: user.id
+        }
+      ]);
+    })
+    .then(() => {
+      return findUserById(1, { include: 'posts' });
+    })
+    .then(user => {
+      console.log('User:', user.firstName, user.lastName);
+      user.posts.forEach(post => {
+        console.log('Post Title:', post.title);
+        console.log('Post Content:', post.content);
+      });
+    })
+    .catch(error => {
+      console.error(error);
+    })
+    .finally(() => {
+      sequelize.close();
+    });
