@@ -14,8 +14,13 @@
  * @returns {function}
  */
 function debounce(func, delay) {
-  // your code here
+  let timer 
+  return function(){}
+  // not finish yet 
 }
+
+
+
 
 /**
  * implement throttle function

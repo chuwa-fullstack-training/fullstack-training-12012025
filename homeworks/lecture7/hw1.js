@@ -14,3 +14,31 @@
  */
 
 // your code here
+
+const fs = require('fs').promises;
+const path = require('path');
+
+async function printFiles() {
+    try{
+        // arguments
+        const directory = process.argv[2];
+        const extension = process.argv[3];
+
+        // readfile
+        const files = await fs.readdir(directory);
+
+        // filter
+        files.forEach(file=>{
+            // get the ext name use path.extname()
+            if(path.extname(file)===`.${extension}`){
+                console.log(file);
+            };
+        });
+
+    }catch(error){
+        console.log("error: ", error);
+    }
+    
+}
+
+printFiles()
