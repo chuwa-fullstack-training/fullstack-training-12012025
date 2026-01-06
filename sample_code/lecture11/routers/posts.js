@@ -4,11 +4,11 @@ const {
   getPostByUser,
   createPost
 } = require('../controllers/post');
-const auth = require('../middlewares/auth');
+const { requireJwt } = require('../middlewares/auth');
 const router = express.Router();
 
-router.get('/', auth, getAllPostsByUser);
-router.get('/:id', auth, getPostByUser);
-router.post('/', auth, createPost);
+router.get('/', requireJwt, getAllPostsByUser);
+router.get('/:id', requireJwt, getPostByUser);
+router.post('/', requireJwt, createPost);
 
 module.exports = router;

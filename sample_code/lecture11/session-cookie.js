@@ -17,10 +17,16 @@ app.use(cookieParser());
 
 app.use(
   session({
+    name: 'sid',
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24
+    }
   })
 );
 
@@ -32,7 +38,7 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-app.post('/login', (req, res) => {
+app.post('/auth/login', (req, res) => {
   const { username, password } = req.body;
 
   if (username === 'admin' && password === 'admin') {
@@ -43,9 +49,11 @@ app.post('/login', (req, res) => {
   }
 });
 
-app.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.send('Logged out');
+app.post('/auth/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie('sid');
+    res.json({ ok: true });
+  });
 });
 
 app.get('/api/protected', authMiddleware, (req, res) => {

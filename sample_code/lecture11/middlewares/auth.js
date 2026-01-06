@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = async (req, res, next) => {
+function requireRole(role) {
+  return (req, res, next) => {
+    const roles = req.user?.roles || [];
+    if (!roles.includes(role))
+      return res.status(403).json({ error: 'forbidden' });
+    next();
+  };
+}
+
+function requireJwt(req, res, next) {
   // Get token from header
   const token =
     req.header('x-auth-token') ||
@@ -14,13 +23,19 @@ module.exports = async (req, res, next) => {
   }
   try {
     // Verify token
-    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Add user from payload
     req.user = decoded.user;
+    // res.locals.user = decoded.user;
 
     next();
   } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
   }
+}
+
+module.exports = {
+  requireJwt,
+  requireRole
 };
